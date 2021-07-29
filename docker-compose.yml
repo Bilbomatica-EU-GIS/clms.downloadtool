@@ -2,7 +2,7 @@ version: "3"
 
 services:
   ploneapi:
-    build: .
+    build: bmeugis/clms.downloadtool:1.0
     ports:
       - "${BACKEND:-8080}:8080"
     environment:

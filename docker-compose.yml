@@ -1,5 +1,4 @@
 version: "2"
-
 services:
   ploneapi:
     build: bmeugis/clms.downloadtool:1.0
@@ -12,13 +11,11 @@ services:
     volumes:
       - data:/data
       - app:/plone/instance/src/clms.downloadtool/
-
   memcached:
     image: memcached
     command:
       - "-m"
       - "512"
-
 volumes:
   data:
     driver: local

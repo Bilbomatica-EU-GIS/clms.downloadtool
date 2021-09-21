@@ -3,7 +3,7 @@ services:
   ploneapi:
     image: bmeugis/clms.downloadtool:2.0
     ports:
-      - "${BACKEND:-8080}:8080"
+      - 80:8080
     environment:
       CORS_ALLOW_ORIGIN: "*"
     depends_on:

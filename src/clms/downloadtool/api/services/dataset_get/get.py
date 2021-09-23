@@ -27,13 +27,9 @@ class dataset_get(Service):
         title = self.request.get("dataset_title")
         utility = getUtility(IDownloadToolUtility)
 
-        if not title:
-            self.request.response.setStatus(200)
-            response_json = utility.dataset_get(title)
-        else:
-            self.request.response.setStatus(200)
-            response_json = utility.dataset_get(title)
-        
+        self.request.response.setStatus(200)
+        response_json = utility.dataset_get(title)
+    
         if "Error, dataset not found" in response_json:
             self.request.response.setStatus(404)
         

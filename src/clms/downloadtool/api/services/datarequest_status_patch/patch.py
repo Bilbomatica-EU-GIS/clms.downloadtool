@@ -402,7 +402,7 @@ class datarequest_status_patch(Service):
 
         if dataset_id:
             for dataset in datasets:
-                if dataset["@id"] in dataset_id:
+                if dataset_id is dataset["@id"]:
                     log.info(dataset["@id"])
                     log.info(dataset)
                     valid_dataset = True

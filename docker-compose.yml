@@ -10,7 +10,7 @@ services:
       - memcached
     volumes:
       - data:/data
-      - .:/plone/instance/src/clms.downloadtool/
+      - data:/plone/instance/src/clms.downloadtool/
   memcached:
     image: memcached
     command:

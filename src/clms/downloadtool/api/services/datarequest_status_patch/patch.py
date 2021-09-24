@@ -381,6 +381,7 @@ class datarequest_status_patch(Service):
         mail = body.get("Mail")
         status = body.get("Status")
         user_id = body.get("UserID")
+        valid_dataset = False
 
         response_json = {}
 

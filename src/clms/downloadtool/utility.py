@@ -135,13 +135,16 @@ class DownloadToolUtility(object):
         if not title:
             return datasets
 
+        search_list = {} 
+
         for i in datasets:
             log.info(i)
             log.info(i["title"])
-            if title == i["title"]:
-                return i
-
-        return "Error, dataset not found"        
+            if title in i["title"]:
+                search_list.append(i)
+        if not search_list:
+            return "Error, dataset not found"
+        return search_list        
 
     def datarequest_status_get(self, task_id):
         site = getSite()

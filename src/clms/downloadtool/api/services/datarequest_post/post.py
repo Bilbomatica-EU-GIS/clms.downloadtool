@@ -388,7 +388,7 @@ class DataRequestPost(Service):
             return "Error, DatasetID is not defined"
         
         for dataset in datasets:
-            if dataset_id is dataset["@id"]:
+            if dataset_id == dataset["@id"]:
                 log.info(dataset["@id"])
                 log.info(dataset)
                 valid_dataset = True

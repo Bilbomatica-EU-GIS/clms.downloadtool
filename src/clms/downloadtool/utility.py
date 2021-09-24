@@ -138,7 +138,7 @@ class DownloadToolUtility(object):
         for i in datasets:
             log.info(i)
             log.info(i["title"])
-            if title is i["title"]:
+            if title == i["title"]:
                 return i
 
         return "Error, dataset not found"        

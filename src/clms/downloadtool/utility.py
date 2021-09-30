@@ -135,7 +135,7 @@ class DownloadToolUtility(object):
         if not title:
             return datasets
 
-        search_list = {} 
+        search_list = [] 
 
         for i in datasets:
             log.info(i)
@@ -163,6 +163,11 @@ class DownloadToolUtility(object):
 
         if task_id not in registry:
             return "Error, task_id not registered"
+
+        log.info(registry[task_id]["UserID"])
+
+        if registry[task_id]["UserID"] != dataObject["UserID"]:
+            return "Error, the UserID does not match"
 
         tempObject = {**registry[task_id], **dataObject}
 

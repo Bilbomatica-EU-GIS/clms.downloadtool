@@ -4,7 +4,7 @@ For HTTP GET operations we can use standard HTTP parameter passing
 through the URL)
 
 """
-import re
+import requests
 import datetime
 from collections import defaultdict
 from logging import getLogger
@@ -17,7 +17,7 @@ from clms.downloadtool.utility import IDownloadToolUtility
 
 
 log = getLogger(__name__)
-
+fme_url = "https://copernicus-fme.eea.europa.eu/fmeserver/#/workspaces/run/CLMS/CLMS_data_download_workflow04102021.fmw"
 countries = {
     "BD": "BGD",
     "BE": "BEL",
@@ -492,6 +492,7 @@ class DataRequestPost(Service):
 
         log.info("AFTER CALLING INSERTION METHOD")
         log.info(response_json)
+        call_fme = requests.post(fme_url, response_json)
 
         self.request.response.setStatus(201)
         return response_json

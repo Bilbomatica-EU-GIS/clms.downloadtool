@@ -17,7 +17,7 @@ from clms.downloadtool.utility import IDownloadToolUtility
 
 
 log = getLogger(__name__)
-fme_url = "https://copernicus-fme.eea.europa.eu/fmeserver/#/workspaces/run/CLMS/CLMS_data_download_workflow04102021.fmw"
+fme_url = "https://copernicus-fme.eea.europa.eu/fmeserver/#/workbench/viewer/CLMS/testAPI-FME.fmw"
 countries = {
     "BD": "BGD",
     "BE": "BEL",

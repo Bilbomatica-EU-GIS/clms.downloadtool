@@ -381,6 +381,8 @@ class datarequest_status_patch(Service):
         mail = body.get("Mail")
         status = body.get("Status")
         user_id = body.get("UserID")
+        download_url = body.get("DownloadURL")
+        filesize = body.get("FileSize")
         valid_dataset = False
 
         response_json = {}
@@ -503,6 +505,12 @@ class datarequest_status_patch(Service):
 
         if dataset_path:
             response_json.update({"DatasetPath": dataset_path})
+
+        if filesize:
+            response_json.update({"FileSize": filesize})
+        
+        if download_url:
+            response_json.update({"DownloadURL": download_url})
 
         log.info(response_json)
         response_json = utility.datarequest_status_patch(

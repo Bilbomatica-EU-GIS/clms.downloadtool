@@ -201,3 +201,24 @@ class DownloadToolUtility(object):
         log.info(type(r.json()))
         datasets = r.json()     
         return datasets["items"]
+    
+    def get_item(self, key):
+        site = getSite()
+        annotations = IAnnotations(site)
+        registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
+        return registry.get(key)
+
+    def save_login(self, username, date):
+        site = getSite()
+        annotations = IAnnotations(site)
+        registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
+        registry[username] = date
+        annotations[ANNOTATION_KEY] = registry
+        return {username:date}
+
+    def get_user(self, username):
+        site = getSite()
+        annotations = IAnnotations(site)
+        registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
+        log.info(registry)
+        return {username:registry.get(username)}

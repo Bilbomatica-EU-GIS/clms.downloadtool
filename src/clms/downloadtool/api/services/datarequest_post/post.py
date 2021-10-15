@@ -499,10 +499,10 @@ class DataRequestPost(Service):
 
         response_json["Status"] = "In_progress"
         fme_json["publishedParameters"].append({"name":"Status", "value": "In_progress"})
-
+        headers = {"Content-Type": "application/json; charset=utf-8"}
         response_json = utility.datarequest_post(response_json)
         
-        fme_json = prepare_fme(response_json, fme_json)
+        fme_json = prepare_fme(response_json, headers=headers, json=fme_json)
         log.info(fme_json)
         
         call_fme = requests.post(fme_url, fme_json)

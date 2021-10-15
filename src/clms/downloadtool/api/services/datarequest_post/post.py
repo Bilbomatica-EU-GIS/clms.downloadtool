@@ -505,7 +505,7 @@ class DataRequestPost(Service):
         fme_json = prepare_fme(response_json, fme_json)
         log.info(fme_json)
         
-        #call_fme = requests.post(fme_url, prepare_fme(fme_json))
+        call_fme = requests.post(fme_url, prepare_fme(fme_json))
         self.request.response.setStatus(201)
         return response_json
 

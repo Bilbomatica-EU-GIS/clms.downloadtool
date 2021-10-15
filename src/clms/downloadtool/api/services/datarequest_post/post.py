@@ -492,7 +492,7 @@ class DataRequestPost(Service):
 
         log.info("AFTER CALLING INSERTION METHOD")
         log.info(response_json)
-        call_fme = requests.post(fme_url, response_json)
+        call_fme = requests.post(fme_url, {"publishedParameters": [response_json]})
         self.request.response.setStatus(201)
         return response_json
 

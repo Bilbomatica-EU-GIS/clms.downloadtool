@@ -502,10 +502,10 @@ class DataRequestPost(Service):
         headers = {"Content-Type": "application/json; charset=utf-8"}
         response_json = utility.datarequest_post(response_json)
         
-        fme_json = prepare_fme(response_json, headers=headers, json=fme_json)
+        fme_json = prepare_fme(response_json, fme_json)
         log.info(fme_json)
         
-        call_fme = requests.post(fme_url, fme_json)
+        call_fme = requests.post(fme_url, headers=headers, json=fme_json)
         self.request.response.setStatus(201)
         return response_json
 

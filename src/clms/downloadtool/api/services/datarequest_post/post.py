@@ -488,11 +488,12 @@ class DataRequestPost(Service):
             response_json.update({"DatasetPath": dataset_path})
 
         response_json["Status"] = "In_progress"
-        response_json = utility.datarequest_post(response_json)
+        fme_json = {"publishedParameters":[response_json]}
 
-        log.info("AFTER CALLING INSERTION METHOD")
-        log.info(response_json)
-        call_fme = requests.post(fme_url, {"publishedParameters": [response_json]})
+        response_json = utility.datarequest_post(response_json)
+        
+        fme_json = prepare_fme(response_json, fme_json)
+        call_fme = requests.post(fme_url, prepare_fme(fme_json))
         self.request.response.setStatus(201)
         return response_json
 
@@ -580,3 +581,8 @@ def email_validation(mail):
         ):
             a = a + 1
     return a > 0 and at > 0 and (dot - at) > 0 and (dot + 1) < y
+
+def prepare_fme(params, fme_json):
+    for item in params:
+        fme_json["publishedParameters"].append({"name":"TaskID", "value": item})
+    return fme_json

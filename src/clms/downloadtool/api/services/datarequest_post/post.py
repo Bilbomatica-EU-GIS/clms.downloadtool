@@ -398,6 +398,7 @@ class DataRequestPost(Service):
             return "Error, the DatasetID is not valid"
         
         response_json = {"UserID": user_id, "DatasetID": dataset_id}
+        fme_json = {"publishedParameters":[{"name": "UserID", "value":user_id}, {"name": "DatasetID", "value":dataset_id}]}
 
 
         if mail:
@@ -405,12 +406,14 @@ class DataRequestPost(Service):
                 self.request.response.setStatus(400)
                 return "Error, inserted mail is not valid"
             response_json.update({"Mail": mail})
+            fme_json["publishedParameters"].append({"name":"Mail", "value": mail})
 
         if nuts_id:
             if not validateNuts(nuts_id):
                 self.request.response.setStatus(400)
                 return "NUTSID country error"
             response_json.update({"NUTSID": nuts_id})
+            fme_json["publishedParameters"].append({"name":"NUTSID", "value": nuts_id})
 
         if bounding_box:
             if nuts_id:
@@ -422,6 +425,7 @@ class DataRequestPost(Service):
                 return "Error, BoundingBox is not valid"
 
             response_json.update({"BoundingBox": bounding_box})
+            fme_json["publishedParameters"].append({"name":"BoundingBox", "value": bounding_box})
 
         if dataset_format or output_format:
             if (
@@ -449,6 +453,8 @@ class DataRequestPost(Service):
                     "OutputFormat": output_format,
                 }
             )
+            fme_json["publishedParameters"].append({"name":"DatasetFormat", "value": dataset_format})
+            fme_json["publishedParameters"].append({"name":"DatasetFormat", "OutputFormat": output_format})
 
         if temporal_filter:
             log.info(validateDate1(temporal_filter))
@@ -477,23 +483,29 @@ class DataRequestPost(Service):
                 )
 
             response_json.update({"TemporalFilter": temporal_filter})
+            fme_json["publishedParameters"].append({"name":"TemporalFilter", "value": temporal_filter})
 
         if outputGCS:
             if outputGCS not in GCS:
                 self.request.response.setStatus(400)
                 return "Error, defined GCS not in the list"
             response_json.update({"OutputGCS": outputGCS})
+            fme_json["publishedParameters"].append({"name":"OutputGCS", "value": outputGCS})
+ 
 
         if dataset_path:
             response_json.update({"DatasetPath": dataset_path})
+            fme_json["publishedParameters"].append({"name":"DatasetPath", "value": dataset_path})
 
         response_json["Status"] = "In_progress"
-        fme_json = {"publishedParameters":[response_json]}
+        fme_json["publishedParameters"].append({"name":"Status", "value": "In_progress"})
 
         response_json = utility.datarequest_post(response_json)
         
         fme_json = prepare_fme(response_json, fme_json)
-        call_fme = requests.post(fme_url, prepare_fme(fme_json))
+        log.info(fme_json)
+        
+        #call_fme = requests.post(fme_url, prepare_fme(fme_json))
         self.request.response.setStatus(201)
         return response_json
 

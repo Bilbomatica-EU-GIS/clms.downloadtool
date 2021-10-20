@@ -8,7 +8,7 @@ import requests
 import datetime
 from collections import defaultdict
 from logging import getLogger
-
+import json
 from plone.restapi.services import Service
 from plone.restapi.deserializer import json_body
 
@@ -398,7 +398,6 @@ class DataRequestPost(Service):
             return "Error, the DatasetID is not valid"
         
         response_json = {"UserID": user_id, "DatasetID": dataset_id}
-        fme_json = {"publishedParameters":[{"name": "UserID", "value":user_id}, {"name": "DatasetID", "value":dataset_id}]}
 
 
         if mail:
@@ -406,14 +405,12 @@ class DataRequestPost(Service):
                 self.request.response.setStatus(400)
                 return "Error, inserted mail is not valid"
             response_json.update({"Mail": mail})
-            fme_json["publishedParameters"].append({"name":"Mail", "value": mail})
 
         if nuts_id:
             if not validateNuts(nuts_id):
                 self.request.response.setStatus(400)
                 return "NUTSID country error"
             response_json.update({"NUTSID": nuts_id})
-            fme_json["publishedParameters"].append({"name":"NUTSID", "value": nuts_id})
 
         if bounding_box:
             if nuts_id:
@@ -425,7 +422,6 @@ class DataRequestPost(Service):
                 return "Error, BoundingBox is not valid"
 
             response_json.update({"BoundingBox": bounding_box})
-            fme_json["publishedParameters"].append({"name":"BoundingBox", "value": bounding_box})
 
         if dataset_format or output_format:
             if (
@@ -453,8 +449,6 @@ class DataRequestPost(Service):
                     "OutputFormat": output_format,
                 }
             )
-            fme_json["publishedParameters"].append({"name":"DatasetFormat", "value": dataset_format})
-            fme_json["publishedParameters"].append({"name":"DatasetFormat", "OutputFormat": output_format})
 
         if temporal_filter:
             log.info(validateDate1(temporal_filter))
@@ -483,32 +477,37 @@ class DataRequestPost(Service):
                 )
 
             response_json.update({"TemporalFilter": temporal_filter})
-            fme_json["publishedParameters"].append({"name":"TemporalFilter", "value": temporal_filter})
 
         if outputGCS:
             if outputGCS not in GCS:
                 self.request.response.setStatus(400)
                 return "Error, defined GCS not in the list"
             response_json.update({"OutputGCS": outputGCS})
-            fme_json["publishedParameters"].append({"name":"OutputGCS", "value": outputGCS})
  
-
         if dataset_path:
             response_json.update({"DatasetPath": dataset_path})
-            fme_json["publishedParameters"].append({"name":"DatasetPath", "value": dataset_path})
 
         response_json["Status"] = "In_progress"
-        fme_json["publishedParameters"].append({"name":"Status", "value": "In_progress"})
-        headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json"}
+        data_object = response_json
+        data_fields = []
+
+        for element in response_json:
+            if "UserID" in element:
+                fieldzz.append("UserID")
+            if "Mail" in element:
+                fieldzz.append("Mail")
+
+        for field in data_fields:
+            del data_object[field]
+
         response_json = utility.datarequest_post(response_json)
-        
-        fme_json = prepare_fme(response_json, fme_json)
-        log.info(fme_json)
-        
-        call_fme = requests.post(fme_url, headers=headers, json=fme_json)
+
+        fme_json = {"publishedParameters":[{"name": "UserID", "value":user_id}, {"name": "TaskID", "value":get_task_id(response_json)}, {"name":"UserMail", "value": mail}, {"name":"json", "value": json.dumps(data_object)}]}
+        headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json"}
+        call_fme = requests.post(fme_url, headers=headers, json=json.dumps(fme_json))
+
         self.request.response.setStatus(201)
         return response_json
-
 
 def validateDate1(temporal_filter):
     """ validate date format year-month day """
@@ -527,7 +526,6 @@ def validateDate1(temporal_filter):
         log.info("Incorrect data format, should be YYYY-MM-DD")
         return False
 
-
 def validateDate2(temporal_filter):
     """ validate date format day-month-year"""
     start_date = temporal_filter.get("StartDate")
@@ -545,7 +543,6 @@ def validateDate2(temporal_filter):
         log.info("Incorrect data format, should be DD-MM-YYYY")
         return False
 
-
 def validateSpatialExtent(bounding_box):
     """ validate Bounding Box """
     if not len(bounding_box) == 4:
@@ -557,7 +554,6 @@ def validateSpatialExtent(bounding_box):
 
     return True
 
-
 def checkDateDifference(temporal_filter):
     """ Check date difference """
     log.info(temporal_filter)
@@ -566,7 +562,6 @@ def checkDateDifference(temporal_filter):
 
     return start_date < end_date
 
-
 def validateNuts(nuts_id):
     """ validate nuts """
 
@@ -574,7 +569,6 @@ def validateNuts(nuts_id):
     if match:
         items = match.groups()
         return items[0] in countries.keys()
-
 
 def email_validation(mail):
     """ validate email address """
@@ -594,7 +588,7 @@ def email_validation(mail):
             a = a + 1
     return a > 0 and at > 0 and (dot - at) > 0 and (dot + 1) < y
 
-def prepare_fme(params, fme_json):
+def get_task_id(params):
     for item in params:
-        fme_json["publishedParameters"].append({"name":"TaskID", "value": item})
-    return fme_json
+        return {"name":"TaskID", "value": item}
+        

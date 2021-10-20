@@ -502,10 +502,10 @@ class DataRequestPost(Service):
 
         response_json = utility.datarequest_post(response_json)
 
-        fme_json = {"publishedParameters":[{"name": "UserID", "value":user_id}, {"name": "TaskID", "value":get_task_id(response_json)}, {"name":"UserMail", "value": mail}, {"name":"json", "value": json.dumps(data_object)}]}
+        fme_json = {"publishedParameters":[{"name": "UserID", "value":user_id}, get_task_id(response_json), {"name":"UserMail", "value": mail}, {"name":"json", "value": json.dumps(data_object)}]}
         headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json"}
         call_fme = requests.post(fme_url, headers=headers, json=json.dumps(fme_json))
-
+        log.info(json.dumps(fme_json))
         self.request.response.setStatus(201)
         return response_json
 

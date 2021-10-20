@@ -493,9 +493,9 @@ class DataRequestPost(Service):
 
         for element in response_json:
             if "UserID" in element:
-                fieldzz.append("UserID")
+                data_fields.append("UserID")
             if "Mail" in element:
-                fieldzz.append("Mail")
+                data_fields.append("Mail")
 
         for field in data_fields:
             del data_object[field]

@@ -392,15 +392,15 @@ class datarequest_status_patch(Service):
 
         if not task_id:
             self.request.response.setStatus(400)
-            return "Error, TaskID is not defined"
+            return {"status": "error", "msg":"Error, TaskID is not defined"}
 
         if not status:
             self.request.response.setStatus(400)
-            return "Error, Status is not defined"
+            return {"status": "error", "msg":"Error, Status is not defined"}
 
         if status not in status_list:
             self.request.response.setStatus(400)
-            return "Error, defined Status is not in the list"
+            return {"status": "error", "msg":"Error, defined Status is not in the list"}
         response_json = {"TaskID": task_id, "Status": status}
 
         if dataset_id:
@@ -412,7 +412,7 @@ class datarequest_status_patch(Service):
             
             if not valid_dataset:
                 self.request.response.setStatus(400)
-                return "Error, the DatasetID is not valid"
+                return {"status": "error", "msg":"Error, the DatasetID is not valid"}
         
             response_json.update({"DatasetID": dataset_id})
 
@@ -422,47 +422,47 @@ class datarequest_status_patch(Service):
         if mail:
             if not email_validation(mail):
                 self.request.response.setStatus(400)
-                return "Error, inserted mail is not valid"
+                return {"status": "error", "msg":"Error, inserted mail is not valid"}
             response_json.update({"Mail": mail})
 
         if nuts_id:
             if bounding_box:
                 self.request.response.setStatus(400)
-                return "Error, BoundingBox is also defined"
+                return {"status": "error", "msg":"Error, BoundingBox is also defined"}
 
             if not validateNuts(nuts_id):
                 self.request.response.setStatus(400)
-                return "NUTSID country error"
+                return {"status": "error", "msg":"NUTSID country error"}
             response_json.update({"NUTSID": nuts_id})
 
         if bounding_box:
             if nuts_id:
                 self.request.response.setStatus(400)
-                return "Error, NUTSID is also defined"
+                return {"status": "error", "msg":"Error, NUTSID is also defined"}
 
             if not validateSpatialExtent(bounding_box):
                 self.request.response.setStatus(400)
-                return "Error, BoundingBox is not valid"
+                return {"status": "error", "msg":"Error, BoundingBox is not valid"}
 
             response_json.update({"BoundingBox": bounding_box})
 
         if dataset_format or output_format:
             if not dataset_format and output_format:
                 self.request.response.setStatus(400)
-                return "Error, you need to specify both formats"
+                return {"status": "error", "msg":"Error, you need to specify both formats"}
             if (
                 dataset_format not in dataset_formats or
                 output_format not in dataset_formats
             ):
                 self.request.response.setStatus(400)
-                return "Error, specified formats are not in the list"
+                return {"status": "error", "msg":"Error, specified formats are not in the list"}
             if (
                 "GML" in dataset_format or not
                 table[dataset_format][output_format]
             ):
                 self.request.response.setStatus(400)
                 # pylint: disable=line-too-long
-                return "Error, specified data formats are not supported in this way"  # noqa
+                return {"status": "error", "msg":"Error, specified data formats are not supported in this way"}  # noqa
             response_json.update(
                 {
                     "DatasetFormat": dataset_format,
@@ -476,31 +476,29 @@ class datarequest_status_patch(Service):
                 temporal_filter
             ):
                 self.request.response.setStatus(400)
-                return "Error, date format is not correct"
+                return {"status": "error", "msg":"Error, date format is not correct"}
 
             if not checkDateDifference(temporal_filter):
                 self.request.response.setStatus(400)
                 # pylint: disable=line-too-long
-                return "Error, difference between StartDate and EndDate is not coherent"  # noqa
+                return {"status": "error", "msg":"Error, difference between StartDate and EndDate is not coherent" } # noqa
 
             if len(temporal_filter.keys()) > 2:
                 self.request.response.setStatus(400)
-                return "Error, TemporalFilter has too many fields"
+                return {"status": "error", "msg":"Error, TemporalFilter has too many fields"}
             if (
                 "StartDate" not in temporal_filter.keys() or
                 "EndDate" not in temporal_filter.keys()
             ):
                 self.request.response.setStatus(400)
-                return (
-                    "Error, TemporalFilter does not have StartDate or EndDate"
-                )
+                return {"status": "error", "msg":"Error, TemporalFilter does not have StartDate or EndDate"}
 
             response_json.update({"TemporalFilter": temporal_filter})
 
         if outputGCS:
             if outputGCS not in GCS:
                 self.request.response.setStatus(400)
-                return "Error, defined GCS not in the list"
+                return {"status": "error", "msg":"Error, defined GCS not in the list"}
             response_json.update({"OutputGCS": outputGCS})
 
         if dataset_path:
@@ -519,21 +517,22 @@ class datarequest_status_patch(Service):
 
         log.info(response_json)
 
-        if "Error" in response_json:
-            self.request.response.setStatus(400)
-            return response_json
 
         if "Error, task_id not registered" in response_json:
             self.request.response.setStatus(404)
-            return response_json
+            return {"status": "error", "msg":response_json}
 
         if (
             "Error, NUTSID and BoundingBox can't be defined in the same task"
             in response_json
         ):
             self.request.response.setStatus(400)
-            return response_json
+            return{"status": "error", "msg":response_json}
 
+        if "Error" in response_json:
+            self.request.response.setStatus(400)
+            return {"status": "error", "msg":response_json}
+            
         self.request.response.setStatus(201)
 
         return response_json

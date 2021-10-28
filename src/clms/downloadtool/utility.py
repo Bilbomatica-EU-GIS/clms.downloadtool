@@ -105,8 +105,8 @@ class DownloadToolUtility(object):
         if not status:
             for key in registry.keys():
                 values = registry.get(key)
-                if str(user_id) == values.get("UserID"):
-                    dataObject[key] = values
+                #if str(user_id) == values.get("UserID"):
+                dataObject[key] = values
             return dataObject
 
         if status not in status_list:
@@ -114,7 +114,7 @@ class DownloadToolUtility(object):
 
         for key in registry.keys():
             values = registry.get(key)
-            if str(user_id) == values.get("UserID") and status == values.get(
+            if status == values.get(
                 "Status"
             ):
                 dataObject[key] = values

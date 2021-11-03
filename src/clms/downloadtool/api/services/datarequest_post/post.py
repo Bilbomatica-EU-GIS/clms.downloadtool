@@ -367,9 +367,9 @@ class DataRequestPost(Service):
         user_id = api.user.get_current()
         datasets_json = body.get("Datasets")
         
+        mail = "aetxebarria@bilbomatica.es"
 
         
-        mail = "kcarpintero@bilbomatica.es"
 
         response_json = {}
         data_object = {}
@@ -414,8 +414,13 @@ class DataRequestPost(Service):
             else:
                 dataset_string += r'},{"DatasetID": "' + dataset_json["DatasetID"] + r'"'
 
+            if not dataset_json["FileID"]:
+                return {"status": "error", "msg":"FileID is not defined"}
+            
+            if "pre-packaged" in response_json["FileID"]:
+                dataset_string += r', "FileID": "' + response_json["FileID"] + r'"'
+            
             dataset_string += r', "FilePath": "' + response_json["FilePath"] + r'"'
-            dataset_string += r', "FileID": "' + response_json["FileID"] + r'"'
 
             if "NUTSID" in dataset_json:
                 if not validateNuts(dataset_json["NUTSID"]):
@@ -542,8 +547,6 @@ class DataRequestPost(Service):
             ]
         }
 
-
-        #falta file id y file path
 
         log.info(params)
         log.info(type(params))

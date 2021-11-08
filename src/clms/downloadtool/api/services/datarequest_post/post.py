@@ -414,8 +414,9 @@ class DataRequestPost(Service):
             else:
                 dataset_string += r'},{"DatasetID": "' + dataset_json["DatasetID"] + r'"'
 
-            if "FileID" not in dataset_json:
-                return {"status": "error", "msg":"FileID is not defined"}
+            if "FileID" in dataset_json:
+                if not dataset_json["FileID"]:
+                    return {"status": "error", "msg":"FileID is not defined"}
             
             if "pre-packaged" in response_json["FileID"]:
                 dataset_string += r', "FileID": "' + response_json["FileID"] + r'"'

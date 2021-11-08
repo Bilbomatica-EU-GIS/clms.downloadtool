@@ -381,7 +381,7 @@ class DataRequestPost(Service):
         utility = getUtility(IDownloadToolUtility)
         datasets = utility.get_dataset_info()
 
-        log.info(datasets_json)º
+        log.info(datasets_json)
 
         for dataset_json in datasets_json:
             

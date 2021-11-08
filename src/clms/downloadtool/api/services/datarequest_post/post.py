@@ -381,7 +381,7 @@ class DataRequestPost(Service):
         utility = getUtility(IDownloadToolUtility)
         datasets = utility.get_dataset_info()
 
-        log.info(datasets_json)
+        log.info(datasets_json)º
 
         for dataset_json in datasets_json:
             
@@ -414,7 +414,7 @@ class DataRequestPost(Service):
             else:
                 dataset_string += r'},{"DatasetID": "' + dataset_json["DatasetID"] + r'"'
 
-            if not dataset_json["FileID"]:
+            if "FileID" not in dataset_json:
                 return {"status": "error", "msg":"FileID is not defined"}
             
             if "pre-packaged" in response_json["FileID"]:
@@ -513,6 +513,8 @@ class DataRequestPost(Service):
             response_json["Status"] = "In_progress"
             data_object["Datasets"].append(response_json)
 
+            
+
 
         response_json = utility.datarequest_post(data_object["Datasets"])
         
@@ -551,14 +553,16 @@ class DataRequestPost(Service):
         log.info(params)
         log.info(type(params))
 
-        body = json.dumps(params).encode('utf-8')
+        """ body = json.dumps(params).encode('utf-8')
 
         req = urllib.request.Request(fme_url, data=body, headers=headers)
         r = urllib.request.urlopen(req)
         resp = r.read()
         resp = resp.decode('utf-8')
         resp = json.loads(resp)
-        log.info('Request status: ' + str(r.status)) 
+        log.info('Request status: ' + str(r.status))  """
+        
+        
 
         #log.info(json.dumps(fme_json))
         self.request.response.setStatus(201)

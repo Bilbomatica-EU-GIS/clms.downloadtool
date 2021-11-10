@@ -14,12 +14,14 @@ from plone.restapi.deserializer import json_body
 from plone import api
 from zope.component import getUtility
 from clms.downloadtool.utility import IDownloadToolUtility
-
+from urllib import request, parse
 
 log = getLogger(__name__)
 #fme_url = "https://copernicus-fme.eea.europa.eu/fmeserver/#/workbench/viewer/CLMS/testAPI-FME.fmw?fmetoken=2d6aaef2df4ba3667c883884f57a8b6bab2efc5e"
 fme_url = 'https://copernicus-fme.eea.europa.eu/fmerest/v3/transformations/submit/CLMS/testAPI-FME.fmw'
+stats_url = "http://127.0.0.1:800/Plone/@register_item"
 TOKEN="2d6aaef2df4ba3667c883884f57a8b6bab2efc5e"
+headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json", 'Authorization' : 'fmetoken token={0}'.format(TOKEN)}
 countries = {
     "BD": "BGD",
     "BE": "BEL",
@@ -391,12 +393,14 @@ class DataRequestPost(Service):
                 self.request.response.setStatus(400)
                 return {"status": "error", "msg":"Error, DatasetID is not defined"}
             valid_dataset = False
+            dataset_download = []
 
             for dataset in datasets:
 
                 if dataset_json["DatasetID"] == dataset["@id"]:
                     log.info(dataset)
                     valid_dataset = True
+                    dataset_download.append(dataset_json["DatasetID"])
                     
                     response_json.update({"FilePath": dataset["@type"]})
                     response_json.update({"FileID": dataset["title"]})
@@ -415,11 +419,11 @@ class DataRequestPost(Service):
                 dataset_string += r'},{"DatasetID": "' + dataset_json["DatasetID"] + r'"'
 
             if "FileID" in dataset_json:
-                if not dataset_json["FileID"]:
-                    return {"status": "error", "msg":"FileID is not defined"}
+                if "pre-packaged" in response_json["FileID"]:
+                    dataset_string += r', "FileID": "' + response_json["FileID"] + r'"'
             
-            if "pre-packaged" in response_json["FileID"]:
-                dataset_string += r', "FileID": "' + response_json["FileID"] + r'"'
+                """ if not dataset_json["FileID"]:
+                    return {"status": "error", "msg":"FileID is not defined"} """
             
             dataset_string += r', "FilePath": "' + response_json["FilePath"] + r'"'
 
@@ -519,7 +523,7 @@ class DataRequestPost(Service):
 
         response_json = utility.datarequest_post(data_object["Datasets"])
         
-        headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json", 'Authorization' : 'fmetoken token={0}'.format(TOKEN)}
+        
 
         log.info(dataset_string)
         dataset_string += r'}'
@@ -550,18 +554,51 @@ class DataRequestPost(Service):
             ]
         }
 
+        #dataset_download = "".join(map(str,dataset_download))
+        stats_params = {
+            "Start":"",
+            "User": str(user_id),
+            "Dataset": "", # this is a list, need 2 be converted
+            "TransformationData": datasets,
+            "TaskID": get_task_id(response_json),
+            "End": "",
+            "TransformationDuration": "",
+            "TransformationSize":"",
+            "TransformationResultData": "",
+            "Successful": ""
+        }
 
-        log.info(params)
+        stats_params = {
+            "Start":"",
+            "User": str(user_id),
+            "TransformationData": datasets,
+            "TaskID": get_task_id(response_json),
+        } 
+
+        log.info(stats_params)
         log.info(type(params))
 
-        """ body = json.dumps(params).encode('utf-8')
 
-        req = urllib.request.Request(fme_url, data=body, headers=headers)
+
+        #headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json" }
+
+        #req = urllib.request.Request(stats_url, data=stats_body, headers=headers)
+        #import requests
+
+        #req = requests.post(stats_url, auth=('admin','admin'), json=stats_body, headers=headers)
+
+
+        #data = parse.urlencode(stats_params).encode()
+
+      
+        body = json.dumps(params).encode('utf-8')
+
+        req = urllib.request.Request(fme_url, data=body, headers=headers) 
         r = urllib.request.urlopen(req)
         resp = r.read()
         resp = resp.decode('utf-8')
         resp = json.loads(resp)
-        log.info('Request status: ' + str(r.status))  """
+        log.info('Request status: ' + str(r.status))  
         
         
 

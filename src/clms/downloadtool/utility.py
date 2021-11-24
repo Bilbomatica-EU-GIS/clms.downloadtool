@@ -154,7 +154,7 @@ class DownloadToolUtility(object):
             return "Error, task not found"
         return registry.get(task_id)
 
-    def datarequest_status_patch(self, dataObject, task_id):
+    def datarequest_status_patch(self, data_object, task_id):
         site = getSite()
         annotations = IAnnotations(site)
         registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
@@ -164,22 +164,17 @@ class DownloadToolUtility(object):
         if task_id not in registry:
             return "Error, task_id not registered"
 
-        log.info(registry[task_id]["UserID"])
 
-        if registry[task_id]["UserID"] != dataObject["UserID"]:
-            return "Error, the UserID does not match"
+        """ if registry[task_id]["UserID"] != dataObject["UserID"]:
+            return "Error, the UserID does not match" """
 
-        tempObject = {**registry[task_id], **dataObject}
+        for element in registry[task_id]:
+            element["Status"] = data_object["Status"]
+            element["DownloadURL"] = data_object["DownloadURL"]
+            element["FileSize"] = data_object["FileSize"]
 
-        if (
-            "NUTSID" in tempObject.keys() and
-            "BoundingBox" in
-            tempObject.keys()
-        ):
-            dataObject = {}
+        tempObject = registry[task_id]
 
-            return "Error, NUTSID and BoundingBox can't be defined in the same task"  # noqa
-        registry[str(task_id)] = tempObject
 
         annotations[ANNOTATION_KEY] = registry
 

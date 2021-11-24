@@ -19,7 +19,7 @@ from urllib import request, parse
 log = getLogger(__name__)
 #fme_url = "https://copernicus-fme.eea.europa.eu/fmeserver/#/workbench/viewer/CLMS/testAPI-FME.fmw?fmetoken=2d6aaef2df4ba3667c883884f57a8b6bab2efc5e"
 fme_url = 'https://copernicus-fme.eea.europa.eu/fmerest/v3/transformations/submit/CLMS/testAPI-FME.fmw'
-stats_url = "http://127.0.0.1:800/Plone/@register_item"
+#stats_url = "http://192.168.0.15:800/Plone/@register_item"
 TOKEN="2d6aaef2df4ba3667c883884f57a8b6bab2efc5e"
 headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json", 'Authorization' : 'fmetoken token={0}'.format(TOKEN)}
 countries = {
@@ -525,7 +525,7 @@ class DataRequestPost(Service):
         
         
 
-        log.info(dataset_string)
+        log.info(response_json)
         dataset_string += r'}'
         log.info(dataset_string)
 
@@ -554,7 +554,6 @@ class DataRequestPost(Service):
             ]
         }
 
-        #dataset_download = "".join(map(str,dataset_download))
         stats_params = {
             "Start":"",
             "User": str(user_id),
@@ -578,7 +577,10 @@ class DataRequestPost(Service):
         log.info(stats_params)
         log.info(type(params))
 
+        stats_body = json.dumps(stats_params).encode('utf-8')
+        data = parse.urlencode(stats_params).encode()
 
+        userAndPass = "admin:admin"
 
         #headers = {"Content-Type": "application/json; charset=utf-8", "Accept": "application/json" }
 
@@ -589,7 +591,8 @@ class DataRequestPost(Service):
 
 
         #data = parse.urlencode(stats_params).encode()
-
+        log.info(stats_body)
+        log.info(type(stats_body))
       
         body = json.dumps(params).encode('utf-8')
 
@@ -666,25 +669,7 @@ def validateNuts(nuts_id):
     if match:
         items = match.groups()
         return items[0] in countries.keys()
-
-def email_validation(mail):
-    """ validate email address """
-    a = 0
-    y = len(mail)
-    dot = mail.find(".")
-    at = mail.find("@")
-    log.info(mail)
-
-    if "_" in mail[len(mail) - 1]:
-        return False
-
-    for i in range(0, at):
-        if (mail[i] >= "a" and mail[i] <= "z") or (
-            mail[i] >= "A" and mail[i] <= "Z"
-        ):
-            a = a + 1
-    return a > 0 and at > 0 and (dot - at) > 0 and (dot + 1) < y
-
+        
 def get_task_id(params):
     for item in params:
         return item

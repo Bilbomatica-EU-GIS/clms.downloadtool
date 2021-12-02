@@ -20,14 +20,14 @@ and call its method.
 We have to understand the utility as being a Singleton object.
 
 """
+from logging import getLogger
+import random
+import requests
 from persistent.mapping import PersistentMapping
 from zope.annotation.interfaces import IAnnotations
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.site.hooks import getSite
-
-import random
-from logging import getLogger
 
 log = getLogger(__name__)
 
@@ -43,12 +43,17 @@ status_list = [
 
 
 class IDownloadToolUtility(Interface):
-    pass
+    """ Downloadtool utility interface
+    """
 
 
 @implementer(IDownloadToolUtility)
-class DownloadToolUtility(object):
+class DownloadToolUtility():
+    """ Downloadtool request methods
+    """
     def datarequest_post(self, data_request):
+        """ DatarequestPost method
+        """
         site = getSite()
         annotations = IAnnotations(site)
         task_id = random.randint(0, 99999999999)
@@ -72,6 +77,8 @@ class DownloadToolUtility(object):
         return {task_id: data_request}
 
     def datarequest_delete(self, task_id, user_id):
+        """ DatarequestDelete method
+        """
         site = getSite()
         annotations = IAnnotations(site)
         registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
@@ -92,6 +99,8 @@ class DownloadToolUtility(object):
         return dataObject
 
     def datarequest_search(self, user_id, status):
+        """ DatarequestSearch method
+        """
         site = getSite()
         annotations = IAnnotations(site)
         registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
@@ -105,7 +114,7 @@ class DownloadToolUtility(object):
         if not status:
             for key in registry.keys():
                 values = registry.get(key)
-                #if str(user_id) == values.get("UserID"):
+                # if str(user_id) == values.get("UserID"):
                 dataObject[key] = values
             return dataObject
 
@@ -122,20 +131,19 @@ class DownloadToolUtility(object):
         return dataObject
 
     def dataset_get(self, title):
-        site = getSite()
-        annotations = IAnnotations(site)
-        registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
+        """ DatasetGet method
+        """
         log.info("Before the for")
         datasets = self.get_dataset_info()
 
         log.info(datasets)
-        #if "items" not in datasets:
+        # if "items" not in datasets:
         #    return "Error, there are no datasets to query"
-        
+
         if not title:
             return datasets
 
-        search_list = [] 
+        search_list = []
 
         for i in datasets:
             log.info(i)
@@ -144,9 +152,11 @@ class DownloadToolUtility(object):
                 search_list.append(i)
         if not search_list:
             return "Error, dataset not found"
-        return search_list        
+        return search_list
 
     def datarequest_status_get(self, task_id):
+        """ DataRequestStatusGet method
+        """
         site = getSite()
         annotations = IAnnotations(site)
         registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
@@ -155,18 +165,15 @@ class DownloadToolUtility(object):
         return registry.get(task_id)
 
     def datarequest_status_patch(self, data_object, task_id):
+        """ DatarequestStatusPatch method
+        """
         site = getSite()
         annotations = IAnnotations(site)
         registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
-        resp = {}
         tempObject = {}
 
         if task_id not in registry:
             return "Error, task_id not registered"
-
-
-        """ if registry[task_id]["UserID"] != dataObject["UserID"]:
-            return "Error, the UserID does not match" """
 
         for element in registry[task_id]:
             element["Status"] = data_object["Status"]
@@ -174,46 +181,24 @@ class DownloadToolUtility(object):
             element["FileSize"] = data_object["FileSize"]
 
         tempObject = registry[task_id]
-
-
         annotations[ANNOTATION_KEY] = registry
 
         return tempObject
 
     def get_dataset_info(self):
-        from urllib.request import urlopen
-        import json
-        import requests
+        """ GetDatasetInfo method
+        """
+        url = "https://clmsdemo.devel6cph.eea.europa.eu/api/"
+        url.join("@search?portal_type=DataSet")
+        r = requests.get(url, headers={"Accept": "application/json"})
 
-        site = getSite()
-        annotations = IAnnotations(site)
-        task_id = random.randint(0, 99999999999)
-
-        url = "https://clmsdemo.devel6cph.eea.europa.eu/api/@search?portal_type=DataSet"
-        r=requests.get(url, headers={"Accept":"application/json"})
-
-        #print(type(r))
-        #log.info(type(r.json()))
-        datasets = r.json()     
+        datasets = r.json()
         return datasets["items"]
-    
+
     def get_item(self, key):
+        """ GetItem method
+        """
         site = getSite()
         annotations = IAnnotations(site)
         registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
         return registry.get(key)
-
-    def save_login(self, username, date):
-        site = getSite()
-        annotations = IAnnotations(site)
-        registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
-        registry[username] = date
-        annotations[ANNOTATION_KEY] = registry
-        return {username:date}
-
-    def get_user(self, username):
-        site = getSite()
-        annotations = IAnnotations(site)
-        registry = annotations.get(ANNOTATION_KEY, PersistentMapping())
-        log.info(registry)
-        return {username:registry.get(username)}
